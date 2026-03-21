@@ -1,0 +1,136 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Machine Status Code",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "query": "from(bucket: \"cnc\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"m80_metrics\" and r.machine == \"M80_1\" and r._field == \"status\")\n  |> aggregateWindow(every: 1s, fn: last, createEmpty: false)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Spindle RPM",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "query": "from(bucket: \"cnc\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"m80_metrics\" and r.machine == \"M80_1\" and r._field == \"spindle_speed\")\n  |> aggregateWindow(every: 1s, fn: last, createEmpty: false)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Spindle Torque Load",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "query": "from(bucket: \"cnc\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"m80_metrics\" and r.machine == \"M80_1\" and r._field == \"spindle_torque_load\")\n  |> aggregateWindow(every: 1s, fn: last, createEmpty: false)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Feed Speed",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "query": "from(bucket: \"cnc\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"m80_metrics\" and r.machine == \"M80_1\" and r._field == \"feed_speed\")\n  |> aggregateWindow(every: 1s, fn: last, createEmpty: false)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Part Count",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 4, "x": 8, "y": 8 },
+      "targets": [
+        {
+          "query": "from(bucket: \"cnc\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"m80_metrics\" and r.machine == \"M80_1\" and r._field == \"part_count\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Current Tool",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 4, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "query": "from(bucket: \"cnc\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"m80_metrics\" and r.machine == \"M80_1\" and r._field == \"tool_number\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Axis Torque (All)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "targets": [
+        {
+          "query": "from(bucket: \"cnc\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"m80_metrics\" and r.machine == \"M80_1\")\n  |> filter(fn: (r) => r._field =~ /^axis_torque_\\d+$/)\n  |> aggregateWindow(every: 1s, fn: last, createEmpty: false)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Axis Feed Rate (All)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "query": "from(bucket: \"cnc\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"m80_metrics\" and r.machine == \"M80_1\")\n  |> filter(fn: (r) => r._field =~ /^axis_feed_rate_\\d+$/)\n  |> aggregateWindow(every: 1s, fn: last, createEmpty: false)",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["m80", "cnc", "oee"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "M80 OEE Live Dashboard",
+  "uid": "m80-oee-live",
+  "version": 1,
+  "weekStart": ""
+}

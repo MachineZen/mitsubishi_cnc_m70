@@ -1,0 +1,292 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB",
+      "label": "InfluxDB",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "title": "M80 OEE Professional (InfluxQL)",
+  "uid": "m80-oee-pro-influxql",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "machine",
+        "type": "query",
+        "label": "Machine",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB}"
+        },
+        "query": "SHOW TAG VALUES FROM \"m80_metrics\" WITH KEY = \"machine\"",
+        "definition": "SHOW TAG VALUES FROM \"m80_metrics\" WITH KEY = \"machine\"",
+        "refresh": 1,
+        "current": {
+          "text": "M80_1",
+          "value": "M80_1",
+          "selected": true
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "OEE %",
+      "gridPos": { "h": 5, "w": 4, "x": 0, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"oee_pct\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 60 },
+              { "color": "green", "value": 85 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Availability %",
+      "gridPos": { "h": 5, "w": 4, "x": 4, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"availability_pct\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1 }, "overrides": [] }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Performance %",
+      "gridPos": { "h": 5, "w": 4, "x": 8, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"performance_pct\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1 }, "overrides": [] }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Quality %",
+      "gridPos": { "h": 5, "w": 4, "x": 12, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"quality_pct\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1 }, "overrides": [] }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Good Parts",
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"good_parts\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Part Count",
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"part_count\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Machine Running",
+      "gridPos": { "h": 5, "w": 4, "x": 0, "y": 5 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"machine_running\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [{ "type": "value", "options": { "0": { "text": "STOPPED" }, "1": { "text": "RUNNING" } } }]
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "AUTO Mode",
+      "gridPos": { "h": 5, "w": 4, "x": 4, "y": 5 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"mode_auto\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "OFF" }, "1": { "text": "ON" } } }] }, "overrides": [] }
+    },
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "MDI Mode",
+      "gridPos": { "h": 5, "w": 4, "x": 8, "y": 5 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"mode_mdi\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "OFF" }, "1": { "text": "ON" } } }] }, "overrides": [] }
+    },
+    {
+      "id": 10,
+      "type": "stat",
+      "title": "REF Mode",
+      "gridPos": { "h": 5, "w": 4, "x": 12, "y": 5 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"mode_ref\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "OFF" }, "1": { "text": "ON" } } }] }, "overrides": [] }
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Total Run Time (min)",
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 5 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"total_run_time_min\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "unit": "m", "decimals": 1 }, "overrides": [] }
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Total Down Time (min)",
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 5 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [{ "refId": "A", "rawQuery": true, "query": "SELECT last(\"total_down_time_min\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter", "resultFormat": "time_series" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "unit": "m", "decimals": 1 }, "overrides": [] }
+    },
+    {
+      "id": 16,
+      "type": "stat",
+      "title": "Machine Connectivity",
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 26 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"machine_connected\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND time > now() - 20s",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "none",
+        "noValue": "DISCONNECTED"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DISCONNECTED" }, "1": { "text": "CONNECTED" } } },
+            { "type": "special", "options": { "match": "null", "result": { "text": "DISCONNECTED" } } }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "OEE Trend (%)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"oee_pct\") AS \"OEE\", last(\"availability_pct\") AS \"Availability\", last(\"performance_pct\") AS \"Performance\", last(\"quality_pct\") AS \"Quality\" FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "resultFormat": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Machine State / Modes",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 10 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"machine_running\") AS \"Running\", last(\"mode_auto\") AS \"AUTO\", last(\"mode_mdi\") AS \"MDI\", last(\"mode_ref\") AS \"REF\" FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter GROUP BY time($__interval) fill(0)",
+          "resultFormat": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "min": 0, "max": 1 },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Run vs Down Time (min)",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 18 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"total_run_time_min\") AS \"RunTime\", last(\"total_down_time_min\") AS \"DownTime\" FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "resultFormat": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "m", "min": 0 },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    }
+  ]
+}

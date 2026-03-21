@@ -1,0 +1,283 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB",
+      "label": "InfluxDB",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "title": "M80 OEE Vertical Dashboard (InfluxQL)",
+  "uid": "m80-oee-vertical-influxql",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "machine",
+        "type": "query",
+        "label": "Machine",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB}"
+        },
+        "query": "SHOW TAG VALUES FROM \"m80_metrics\" WITH KEY = \"machine\"",
+        "definition": "SHOW TAG VALUES FROM \"m80_metrics\" WITH KEY = \"machine\"",
+        "refresh": 1,
+        "current": {
+          "text": "M80_1",
+          "value": "M80_1",
+          "selected": true
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "bargauge",
+      "title": "Spindle RPM (Vertical Bar)",
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"spindle_speed\") AS \"RPM\" FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rpm",
+          "min": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "type": "bargauge",
+      "title": "Spindle Torque (Vertical Bar)",
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"spindle_torque_load\") AS \"Torque\" FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "bargauge",
+      "title": "Feed Speed (Vertical Bar)",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"feed_speed\") AS \"Feed\" FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "bargauge",
+      "title": "Machine Status Code (Vertical Bar)",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"status\") AS \"Status\" FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 10
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Part Count",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 8 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"part_count\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" },
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Current Tool",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 8 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"tool_number\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" },
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Alarm Active",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 8 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"alarm_active\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "NO" }, "1": { "text": "YES" } } }
+          ]
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "Status Text",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 8 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"status_text\") FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" },
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 9,
+      "type": "bargauge",
+      "title": "Axis Torque (1-8 Vertical)",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"axis_torque_1\") AS \"T1\", last(\"axis_torque_2\") AS \"T2\", last(\"axis_torque_3\") AS \"T3\", last(\"axis_torque_4\") AS \"T4\", last(\"axis_torque_5\") AS \"T5\", last(\"axis_torque_6\") AS \"T6\", last(\"axis_torque_7\") AS \"T7\", last(\"axis_torque_8\") AS \"T8\" FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" }
+      }
+    },
+    {
+      "id": 10,
+      "type": "bargauge",
+      "title": "Axis Feed Rate (1-8 Vertical)",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"axis_feed_rate_1\") AS \"F1\", last(\"axis_feed_rate_2\") AS \"F2\", last(\"axis_feed_rate_3\") AS \"F3\", last(\"axis_feed_rate_4\") AS \"F4\", last(\"axis_feed_rate_5\") AS \"F5\", last(\"axis_feed_rate_6\") AS \"F6\", last(\"axis_feed_rate_7\") AS \"F7\", last(\"axis_feed_rate_8\") AS \"F8\" FROM \"m80_metrics\" WHERE \"machine\"='$machine' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false, "fields": "" }
+      }
+    }
+  ]
+}
