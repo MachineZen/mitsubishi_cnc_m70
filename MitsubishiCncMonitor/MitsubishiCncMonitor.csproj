@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(CollectorExecutablePath)' != '' and Exists('$(CollectorExecutablePath)')">
+    <Content Include="$(CollectorExecutablePath)" Link="MitsubishiCncCollector.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <TargetPath>MitsubishiCncCollector.exe</TargetPath>
+    </Content>
+  </ItemGroup>
+
+</Project>
