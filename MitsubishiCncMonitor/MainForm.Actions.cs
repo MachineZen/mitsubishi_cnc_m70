@@ -108,16 +108,16 @@ public sealed partial class MainForm
 
         SetDetailValue("endpoint", state.IsConfigured ? $"{state.Machine.IpAddress}:{_settings.SharedPort}" : "--");
         SetDetailValue("connection", $"{DescribeState(effectiveState)} | {state.StatusMessage}");
-        SetDetailValue("status", sample?.StatusText ?? "--");
+        SetDetailValue("status", sample?.StatusDisplayText ?? "--");
         SetDetailValue("mode", sample?.ModeText ?? "--");
         SetDetailValue("runstatus", sample?.RunStatusText ?? "--");
-        SetDetailValue("spindle", sample is null ? "--" : $"{sample.SpindleSpeed} rpm");
-        SetDetailValue("spindleload", sample is null ? "--" : $"{sample.SpindleTorqueLoad}");
-        SetDetailValue("feed", sample is null ? "--" : $"{sample.FeedSpeed:0.###}");
-        SetDetailValue("parts", sample?.PartCount.ToString() ?? "--");
+        SetDetailValue("spindle", sample?.SpindleText ?? "--");
+        SetDetailValue("spindleload", sample?.SpindleLoadText ?? "--");
+        SetDetailValue("feed", sample is null ? "--" : $"{sample.FeedText} mm/min");
+        SetDetailValue("parts", sample?.PartsText ?? "--");
         SetDetailValue("tool", sample?.ToolText ?? "--");
         SetDetailValue("alarm", sample?.AlarmSummary ?? (string.IsNullOrWhiteSpace(state.LastError) ? "No active alarm" : state.LastError));
-        SetDetailValue("updated", state.LastUpdated.HasValue ? state.LastUpdated.Value.ToString("dd-MMM-yyyy HH:mm:ss") : "--");
+        SetDetailValue("updated", state.LastUpdated.HasValue ? state.LastUpdated.Value.ToString("dd-MMM-yyyy HH:mm:ss.fff") : "--");
 
         RefreshOeeGauges(state);
         LoadSelectedMachineProcessInputs(state);
@@ -144,7 +144,7 @@ public sealed partial class MainForm
                 ? sample.AxisFeedRate[index]!.Value.ToString("0.###")
                 : "--";
 
-            _axisGrid.Rows.Add($"Axis {index + 1}", torque, feed);
+            _axisGrid.Rows.Add(sample.GetAxisLabel(index), torque, feed);
         }
     }
 
@@ -155,13 +155,13 @@ public sealed partial class MainForm
         foreach (var sample in history.Take(60))
         {
             _historyGrid.Rows.Add(
-                sample.TimestampLocal.ToString("dd-MMM HH:mm:ss"),
-                sample.StatusText,
+                sample.TimestampLocal.ToString("dd-MMM HH:mm:ss.fff"),
+                sample.StatusDisplayText,
                 sample.ModeText,
                 sample.RunStatusText,
                 sample.SpindleSpeed,
-                sample.FeedSpeed.ToString("0.###"),
-                sample.PartCount,
+                sample.FeedText,
+                sample.PartsText,
                 sample.ToolText,
                 sample.AlarmActive ? sample.AlarmSummary : "No active alarm");
         }
@@ -260,6 +260,7 @@ public sealed partial class MainForm
         _settings = CaptureSettingsFromControls();
         SettingsStore.Save(_settings);
         RebuildRuntimeStates();
+        ResetCsvLoggers();
 
         if (!EnsureCollectorAvailable())
         {
@@ -269,6 +270,7 @@ public sealed partial class MainForm
         }
 
         EnsureSessions();
+        EnsureCsvLoggers();
         _monitoringActive = true;
 
         for (var index = 0; index < _machineStates.Count; index++)
@@ -282,7 +284,9 @@ public sealed partial class MainForm
 
         RefreshDashboard();
         RefreshDetailPanel();
-        UpdateStatus("Monitoring started.");
+        var logPath = _csvLoggers.Values.Select(logger => logger.FilePath).FirstOrDefault(path => !string.IsNullOrWhiteSpace(path))
+            ?? CsvSampleLogger.ResolveDefaultLogDirectory();
+        UpdateStatus($"Monitoring started. CSV logs will be written under {logPath}.");
     }
 
     private void StopMonitoring()
@@ -293,6 +297,8 @@ public sealed partial class MainForm
         {
             session.Stop();
         }
+
+        ResetCsvLoggers();
 
         foreach (var state in _machineStates)
         {
@@ -319,6 +325,31 @@ public sealed partial class MainForm
             session.SampleReceived += HandleSessionSampleReceived;
             _sessions[index] = session;
         }
+    }
+
+    private void EnsureCsvLoggers()
+    {
+        var logDirectory = CsvSampleLogger.ResolveDefaultLogDirectory();
+
+        for (var index = 0; index < _machineStates.Count; index++)
+        {
+            if (_csvLoggers.ContainsKey(index) || !_machineStates[index].IsConfigured)
+            {
+                continue;
+            }
+
+            _csvLoggers[index] = new CsvSampleLogger(_machineStates[index].DisplayName, logDirectory);
+        }
+    }
+
+    private void ResetCsvLoggers()
+    {
+        foreach (var logger in _csvLoggers.Values)
+        {
+            logger.Dispose();
+        }
+
+        _csvLoggers.Clear();
     }
 
     private void HandleSessionStateChanged(object? sender, MachineStateChangedEventArgs e)
@@ -353,10 +384,25 @@ public sealed partial class MainForm
         RunOnUiThread(() =>
         {
             var state = _machineStates[e.SlotIndex];
+            if (_csvLoggers.TryGetValue(e.SlotIndex, out var logger))
+            {
+                try
+                {
+                    logger.LogSample(e.Sample);
+                }
+                catch (Exception ex)
+                {
+                    state.LastError = $"CSV logging failed: {ex.Message}";
+                }
+            }
+
             state.AddSample(e.Sample, MaxHistoryRows);
             state.State = ConnectionState.Running;
             state.StatusMessage = "Receiving live data.";
-            state.LastError = string.Empty;
+            if (!state.LastError.StartsWith("CSV logging failed:", StringComparison.Ordinal))
+            {
+                state.LastError = string.Empty;
+            }
 
             RefreshDashboard();
             if (_selectedSlotIndex == e.SlotIndex)

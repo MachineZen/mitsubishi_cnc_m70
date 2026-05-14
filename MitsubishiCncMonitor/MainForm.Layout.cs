@@ -14,8 +14,8 @@ public sealed partial class MainForm
             Padding = new Padding(18, 18, 18, 10),
             BackColor = BackColor
         };
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 122F));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 272F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 112F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 250F));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
 
         root.Controls.Add(BuildHeroPanel(), 0, 0);
@@ -28,6 +28,10 @@ public sealed partial class MainForm
             SplitterWidth = 8,
             BackColor = BackColor
         };
+        _contentSplit.Panel1MinSize = 240;
+        _contentSplit.Panel2MinSize = 280;
+        _contentSplit.Panel1.AutoScroll = true;
+        _contentSplit.Panel2.AutoScroll = true;
         _contentSplit.Panel1.Padding = new Padding(0, 0, 0, 10);
         _contentSplit.Panel2.Padding = new Padding(0);
         _contentSplit.Panel1.Controls.Add(BuildDashboardPanel());
@@ -137,18 +141,21 @@ public sealed partial class MainForm
     private Control BuildConnectionPanel()
     {
         var panel = CreateSurfacePanel();
-        panel.Padding = new Padding(22, 18, 22, 18);
+        panel.Padding = new Padding(18, 12, 18, 12);
+        panel.AutoScroll = true;
 
         var root = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
             ColumnCount = 1,
             RowCount = 3,
-            BackColor = Color.Transparent
+            BackColor = Color.Transparent,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 94F));
-        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         panel.Controls.Add(root);
 
         var titleHost = new TableLayoutPanel
@@ -261,18 +268,21 @@ public sealed partial class MainForm
         root.Controls.Add(actions, 0, 1);
 
         var endpointsPanel = CreateInsetPanel();
-        endpointsPanel.Padding = new Padding(18, 16, 18, 16);
-        endpointsPanel.Margin = new Padding(0, 8, 0, 0);
+        endpointsPanel.Padding = new Padding(18, 12, 18, 12);
+        endpointsPanel.Margin = new Padding(0, 6, 0, 0);
+        endpointsPanel.AutoScroll = true;
 
         var endpointsRoot = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
             RowCount = 3,
-            BackColor = Color.Transparent
+            BackColor = Color.Transparent,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
-        endpointsRoot.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-        endpointsRoot.RowStyles.Add(new RowStyle(SizeType.Absolute, 18F));
-        endpointsRoot.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        endpointsRoot.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));
+        endpointsRoot.RowStyles.Add(new RowStyle(SizeType.Absolute, 16F));
+        endpointsRoot.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         endpointsPanel.Controls.Add(endpointsRoot);
 
         endpointsRoot.Controls.Add(new Label
@@ -292,16 +302,18 @@ public sealed partial class MainForm
 
         var editors = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
             ColumnCount = 3,
             RowCount = MachineCount + 1,
             BackColor = Color.Transparent,
-            Margin = new Padding(0, 8, 0, 0)
+            Margin = new Padding(0, 6, 0, 0),
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
-        editors.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130F));
+        editors.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120F));
         editors.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260F));
         editors.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        editors.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+        editors.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
 
         editors.Controls.Add(CreateEndpointHeader("Machine"), 0, 0);
         editors.Controls.Add(CreateEndpointHeader("Display Name"), 1, 0);
@@ -309,7 +321,7 @@ public sealed partial class MainForm
 
         for (var index = 0; index < MachineCount; index++)
         {
-            editors.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            editors.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
 
             editors.Controls.Add(new Label
             {
@@ -339,17 +351,20 @@ public sealed partial class MainForm
     private Control BuildDashboardPanel()
     {
         var panel = CreateSurfacePanel();
-        panel.Padding = new Padding(22, 18, 22, 18);
+        panel.Padding = new Padding(18, 12, 18, 12);
+        panel.AutoScroll = true;
 
         var root = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
             RowCount = 3,
-            BackColor = Color.Transparent
+            BackColor = Color.Transparent,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         panel.Controls.Add(root);
 
         root.Controls.Add(new Label
@@ -369,14 +384,19 @@ public sealed partial class MainForm
 
         var cards = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
             ColumnCount = 3,
             BackColor = Color.Transparent,
-            Margin = new Padding(0, 12, 0, 0)
+            Margin = new Padding(0, 12, 0, 0),
+            RowCount = 1,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            MinimumSize = new Size(0, 220)
         };
         cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
         cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
         cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+        cards.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
         for (var index = 0; index < MachineCount; index++)
         {
@@ -396,16 +416,19 @@ public sealed partial class MainForm
     private Control BuildDetailsPanel()
     {
         var panel = CreateSurfacePanel();
-        panel.Padding = new Padding(22, 18, 22, 18);
+        panel.Padding = new Padding(18, 12, 18, 12);
+        panel.AutoScroll = true;
 
         var root = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
             RowCount = 2,
-            BackColor = Color.Transparent
+            BackColor = Color.Transparent,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         panel.Controls.Add(root);
 
         var header = new TableLayoutPanel
@@ -437,12 +460,15 @@ public sealed partial class MainForm
 
         var body = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
             ColumnCount = 2,
             BackColor = Color.Transparent,
-            Margin = new Padding(0, 10, 0, 0)
+            Margin = new Padding(0, 10, 0, 0),
+            MinimumSize = new Size(0, 520),
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
-        body.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 430F));
+        body.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 400F));
         body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
         body.Controls.Add(BuildSelectedMachinePanel(), 0, 0);
@@ -456,17 +482,21 @@ public sealed partial class MainForm
         var panel = CreateInsetPanel();
         panel.Padding = new Padding(18);
         panel.Margin = new Padding(0, 0, 12, 0);
+        panel.AutoScroll = true;
+        panel.MinimumSize = new Size(380, 520);
 
         var root = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
             RowCount = 4,
-            BackColor = Color.Transparent
+            BackColor = Color.Transparent,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 188F));
-        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 204F));
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         panel.Controls.Add(root);
 
         _detailMachineTitle = new Label
@@ -506,11 +536,11 @@ public sealed partial class MainForm
         facts.Controls.Add(CreateFactTile("CNC Status", "status"), 2, 0);
         facts.Controls.Add(CreateFactTile("Mode", "mode"), 0, 1);
         facts.Controls.Add(CreateFactTile("Run Status", "runstatus"), 1, 1);
-        facts.Controls.Add(CreateFactTile("Spindle", "spindle"), 2, 1);
+        facts.Controls.Add(CreateFactTile("Spindle RPM", "spindle"), 2, 1);
         facts.Controls.Add(CreateFactTile("Spindle Load", "spindleload"), 0, 2);
-        facts.Controls.Add(CreateFactTile("Feed Speed", "feed"), 1, 2);
+        facts.Controls.Add(CreateFactTile("Feed Rate", "feed"), 1, 2);
         facts.Controls.Add(CreateFactTile("Part Count", "parts"), 2, 2);
-        facts.Controls.Add(CreateFactTile("Tool", "tool"), 0, 3);
+        facts.Controls.Add(CreateFactTile("Tool No", "tool"), 0, 3);
         facts.Controls.Add(CreateFactTile("Alarm", "alarm"), 1, 3);
         facts.Controls.Add(CreateFactTile("Last Update", "updated"), 2, 3);
         root.Controls.Add(facts, 0, 2);
@@ -524,24 +554,29 @@ public sealed partial class MainForm
     {
         var root = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
             RowCount = 2,
-            BackColor = Color.Transparent
+            BackColor = Color.Transparent,
+            MinimumSize = new Size(520, 520),
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink
         };
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 220F));
-        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 148F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 360F));
 
         root.Controls.Add(BuildGaugePanel(), 0, 0);
 
         _detailSplit = new SplitContainer
         {
             Dock = DockStyle.Fill,
-            Orientation = Orientation.Horizontal,
+            Orientation = Orientation.Vertical,
             SplitterWidth = 8,
             BackColor = BackColor
         };
-        _detailSplit.Panel1.Padding = new Padding(12, 10, 0, 8);
-        _detailSplit.Panel2.Padding = new Padding(12, 8, 0, 0);
+        _detailSplit.Panel1MinSize = 280;
+        _detailSplit.Panel2MinSize = 280;
+        _detailSplit.Panel1.Padding = new Padding(12, 10, 6, 0);
+        _detailSplit.Panel2.Padding = new Padding(6, 10, 0, 0);
 
         _detailSplit.Panel1.Controls.Add(BuildHistoryPanel());
         _detailSplit.Panel2.Controls.Add(BuildAxisPanel());
@@ -627,10 +662,10 @@ public sealed partial class MainForm
         _historyGrid.Columns.Add("status", "Status");
         _historyGrid.Columns.Add("mode", "Mode");
         _historyGrid.Columns.Add("run", "Run");
-        _historyGrid.Columns.Add("spindle", "Spindle");
+        _historyGrid.Columns.Add("spindle", "RPM");
         _historyGrid.Columns.Add("feed", "Feed");
         _historyGrid.Columns.Add("parts", "Parts");
-        _historyGrid.Columns.Add("tool", "Tool");
+        _historyGrid.Columns.Add("tool", "Tool No");
         _historyGrid.Columns.Add("alarm", "Alarm");
         _historyGrid.Columns[0].Width = 130;
         _historyGrid.Columns[1].Width = 84;
@@ -664,16 +699,16 @@ public sealed partial class MainForm
         root.Controls.Add(new Label
         {
             Dock = DockStyle.Fill,
-            Text = "Axis Load And Feed",
+            Text = "Axis Torque And Feed Rate",
             Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold),
             ForeColor = Color.FromArgb(51, 65, 85)
         }, 0, 0);
 
         _axisGrid = CreateReadOnlyGrid();
         _axisGrid.Columns.Add("axis", "Axis");
-        _axisGrid.Columns.Add("torque", "Torque");
-        _axisGrid.Columns.Add("feed", "Feed Delta");
-        _axisGrid.Columns[0].Width = 80;
+        _axisGrid.Columns.Add("torque", "Servo Torque");
+        _axisGrid.Columns.Add("feed", "Axis Feed Rate");
+        _axisGrid.Columns[0].Width = 120;
         _axisGrid.Columns[1].Width = 120;
         _axisGrid.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
         root.Controls.Add(_axisGrid, 0, 1);

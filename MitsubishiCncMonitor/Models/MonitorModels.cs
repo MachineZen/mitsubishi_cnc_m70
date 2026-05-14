@@ -96,6 +96,9 @@ public sealed class CollectorSample
     [JsonPropertyName("ts")]
     public long UnixTimestamp { get; set; }
 
+    [JsonPropertyName("ts_ms")]
+    public long UnixTimestampMilliseconds { get; set; }
+
     [JsonPropertyName("sample")]
     public int SampleNumber { get; set; }
 
@@ -132,6 +135,9 @@ public sealed class CollectorSample
     [JsonPropertyName("axis_count")]
     public int AxisCount { get; set; }
 
+    [JsonPropertyName("axis_names")]
+    public List<string> AxisNames { get; set; } = [];
+
     [JsonPropertyName("axis_torque")]
     public List<int?> AxisTorque { get; set; } = [];
 
@@ -150,14 +156,62 @@ public sealed class CollectorSample
     [JsonPropertyName("ret")]
     public CollectorReturnCodes? ReturnCodes { get; set; }
 
+    public long EffectiveUnixTimestampMilliseconds =>
+        UnixTimestampMilliseconds > 0 ? UnixTimestampMilliseconds : UnixTimestamp > 0 ? UnixTimestamp * 1000 : 0;
+
     public DateTimeOffset TimestampLocal =>
-        UnixTimestamp > 0 ? DateTimeOffset.FromUnixTimeSeconds(UnixTimestamp).ToLocalTime() : DateTimeOffset.Now;
+        EffectiveUnixTimestampMilliseconds > 0
+            ? DateTimeOffset.FromUnixTimeMilliseconds(EffectiveUnixTimestampMilliseconds).ToLocalTime()
+            : DateTimeOffset.Now;
 
     public string ModeText => Lookup(Mode, ModeMap);
 
     public string RunStatusText => Lookup(RunStatus, RunStatusMap);
 
+    public string StatusDisplayText =>
+        string.IsNullOrWhiteSpace(StatusText) ? Status.ToString(CultureInfo.InvariantCulture) : StatusText;
+
     public string ToolText => ToolNumber.HasValue ? ToolNumber.Value.ToString(CultureInfo.InvariantCulture) : "--";
+
+    public string PartsText => PartCount.ToString(CultureInfo.InvariantCulture);
+
+    public string SpindleText => $"{SpindleSpeed.ToString(CultureInfo.InvariantCulture)} rpm";
+
+    public string SpindleLoadText => SpindleTorqueLoad.ToString(CultureInfo.InvariantCulture);
+
+    public string FeedText => FeedSpeed.ToString("0.###", CultureInfo.InvariantCulture);
+
+    public string AlarmBadgeText
+    {
+        get
+        {
+            if (!AlarmActive)
+            {
+                return "OK";
+            }
+
+            if (AlarmNumber > 0)
+            {
+                return AlarmNumber.ToString(CultureInfo.InvariantCulture);
+            }
+
+            return "ALM";
+        }
+    }
+
+    public string GetAxisLabel(int axisIndex)
+    {
+        if (axisIndex >= 0 && axisIndex < AxisNames.Count)
+        {
+            var name = AxisNames[axisIndex]?.Trim();
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                return name;
+            }
+        }
+
+        return $"Axis {axisIndex + 1}";
+    }
 
     public string AlarmSummary
     {

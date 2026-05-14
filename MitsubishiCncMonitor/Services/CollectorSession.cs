@@ -133,7 +133,7 @@ public sealed class CollectorSession : IDisposable
                 }
 
                 PublishSample(sample);
-                PublishState(ConnectionState.Running, $"Last update {sample.TimestampLocal:HH:mm:ss}");
+                PublishState(ConnectionState.Running, $"Last update {sample.TimestampLocal:HH:mm:ss.fff}");
             }
         }
         catch (OperationCanceledException)

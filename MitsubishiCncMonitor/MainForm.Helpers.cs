@@ -176,7 +176,7 @@ public sealed partial class MainForm
     {
         if (_contentSplit is not null && _contentSplit.Height > 0)
         {
-            var target = Math.Min(286, _contentSplit.Height - 140);
+            var target = Math.Clamp((_contentSplit.Height * 40) / 100, 250, 300);
             if (target > 80 && target < _contentSplit.Height - 40)
             {
                 _contentSplit.SplitterDistance = target;
@@ -185,8 +185,8 @@ public sealed partial class MainForm
 
         if (_detailSplit is not null && _detailSplit.Height > 0)
         {
-            var target = Math.Min(220, _detailSplit.Height - 120);
-            if (target > 80 && target < _detailSplit.Height - 30)
+            var target = Math.Clamp(_detailSplit.Width / 2, 260, 520);
+            if (target > 120 && target < _detailSplit.Width - 120)
             {
                 _detailSplit.SplitterDistance = target;
             }
@@ -283,7 +283,7 @@ public sealed partial class MainForm
         {
             Dock = DockStyle.Fill,
             BackColor = Color.White,
-            Margin = new Padding(0, 0, 10, 10)
+            Margin = new Padding(0, 0, 6, 6)
         };
         panel.Paint += (_, e) =>
         {
@@ -296,26 +296,27 @@ public sealed partial class MainForm
             Dock = DockStyle.Fill,
             RowCount = 2,
             BackColor = Color.Transparent,
-            Padding = new Padding(12, 8, 12, 8)
+            Padding = new Padding(6, 4, 6, 4)
         };
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 16F));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 12F));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
 
         layout.Controls.Add(new Label
         {
             Dock = DockStyle.Fill,
             Text = caption,
-            Font = new Font("Segoe UI", 8F, FontStyle.Regular),
+            Font = new Font("Segoe UI", 7F, FontStyle.Regular),
             ForeColor = Color.FromArgb(100, 116, 139)
         }, 0, 0);
 
         var valueLabel = new Label
         {
             Dock = DockStyle.Fill,
-            Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold),
+            Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
             ForeColor = Color.FromArgb(15, 23, 42),
             TextAlign = ContentAlignment.MiddleLeft,
-            AutoEllipsis = true
+            AutoEllipsis = true,
+            Text = "--"
         };
         _detailValueLabels[key] = valueLabel;
         layout.Controls.Add(valueLabel, 0, 1);
@@ -403,7 +404,8 @@ public sealed partial class MainForm
             Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
             ForeColor = Color.FromArgb(15, 23, 42),
             TextAlign = ContentAlignment.MiddleLeft,
-            AutoEllipsis = true
+            AutoEllipsis = true,
+            Text = "--"
         };
 
         _detailValueLabels[key] = valueLabel;

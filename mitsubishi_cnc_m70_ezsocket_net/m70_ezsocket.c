@@ -463,8 +463,7 @@ m70_error_code_e m70_cnc_read_svo_load(m70_conn_t* conn, short system_no, short*
 	if (!check_conn_is_valid(conn))
 		return ret;
 
-	uint32 axis_flag = 1;
-	axis_flag = get_axis_real_no(axis_flag);
+	uint32 axis_flag = get_axis_real_no(axis_index);
 	short data;
 	m70_data_type_e data_type = T_SHORT;
 	if (0 == melGetData(conn, 59, 4, system_no, axis_flag, &data_type, &data))

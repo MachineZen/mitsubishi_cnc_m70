@@ -12,6 +12,7 @@ public sealed partial class MainForm : Form
     ];
 
     private readonly Dictionary<int, MachineCardView> _machineCards = [];
+    private readonly Dictionary<int, CsvSampleLogger> _csvLoggers = [];
     private readonly Dictionary<int, CollectorSession> _sessions = [];
     private readonly List<MachineRuntimeState> _machineStates = [];
     private readonly TextBox[] _machineNameInputs = new TextBox[MachineCount];
@@ -92,6 +93,11 @@ public sealed partial class MainForm : Form
         foreach (var session in _sessions.Values)
         {
             session.Dispose();
+        }
+
+        foreach (var logger in _csvLoggers.Values)
+        {
+            logger.Dispose();
         }
 
         base.OnFormClosing(e);

@@ -10,9 +10,11 @@ public sealed class MachineCardView : Panel
     private readonly Label _statusValue;
     private readonly Label _modeValue;
     private readonly Label _runValue;
-    private readonly Label _oeeValue;
-    private readonly Label _mrrValue;
-    private readonly Label _partsValue;
+    private readonly Label _toolValue;
+    private readonly Label _spindleValue;
+    private readonly Label _feedValue;
+    private readonly Label _loadValue;
+    private readonly Label _alarmValue;
     private readonly Label _messageValue;
     private readonly Label _updatedValue;
 
@@ -24,8 +26,8 @@ public sealed class MachineCardView : Panel
         SlotIndex = slotIndex;
         DoubleBuffered = true;
         Margin = new Padding(0, 0, 0, 0);
-        Padding = new Padding(18, 18, 18, 16);
-        MinimumSize = new Size(320, 230);
+        Padding = new Padding(16, 14, 16, 12);
+        MinimumSize = new Size(320, 210);
         BackColor = Color.White;
         Cursor = Cursors.Hand;
 
@@ -35,10 +37,10 @@ public sealed class MachineCardView : Panel
             RowCount = 4,
             BackColor = Color.Transparent
         };
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
         Controls.Add(root);
 
         var header = new TableLayoutPanel
@@ -64,7 +66,7 @@ public sealed class MachineCardView : Panel
             Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold),
             TextAlign = ContentAlignment.MiddleCenter,
             ForeColor = Color.White,
-            Margin = new Padding(12, 3, 0, 3)
+            Margin = new Padding(10, 2, 0, 2)
         };
         header.Controls.Add(_nameLabel, 0, 0);
         header.Controls.Add(_stateBadge, 1, 0);
@@ -83,23 +85,26 @@ public sealed class MachineCardView : Panel
         var metrics = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 3,
+            ColumnCount = 4,
             RowCount = 2,
             BackColor = Color.Transparent,
-            Margin = new Padding(0, 12, 0, 10)
+            Margin = new Padding(0, 8, 0, 6)
         };
-        metrics.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-        metrics.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-        metrics.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+        metrics.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+        metrics.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+        metrics.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+        metrics.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
         metrics.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
         metrics.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
 
         metrics.Controls.Add(CreateMetricTile("Status", out _statusValue), 0, 0);
         metrics.Controls.Add(CreateMetricTile("Mode", out _modeValue), 1, 0);
         metrics.Controls.Add(CreateMetricTile("Run", out _runValue), 2, 0);
-        metrics.Controls.Add(CreateMetricTile("OEE", out _oeeValue), 0, 1);
-        metrics.Controls.Add(CreateMetricTile("MRR", out _mrrValue), 1, 1);
-        metrics.Controls.Add(CreateMetricTile("Parts", out _partsValue), 2, 1);
+        metrics.Controls.Add(CreateMetricTile("Tool No", out _toolValue), 3, 0);
+        metrics.Controls.Add(CreateMetricTile("RPM", out _spindleValue), 0, 1);
+        metrics.Controls.Add(CreateMetricTile("Feed", out _feedValue), 1, 1);
+        metrics.Controls.Add(CreateMetricTile("S.Load", out _loadValue), 2, 1);
+        metrics.Controls.Add(CreateMetricTile("Alarm", out _alarmValue), 3, 1);
         root.Controls.Add(metrics, 0, 2);
 
         var footer = new TableLayoutPanel
@@ -108,20 +113,20 @@ public sealed class MachineCardView : Panel
             RowCount = 2,
             BackColor = Color.Transparent
         };
-        footer.RowStyles.Add(new RowStyle(SizeType.Absolute, 22F));
-        footer.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+        footer.RowStyles.Add(new RowStyle(SizeType.Absolute, 18F));
+        footer.RowStyles.Add(new RowStyle(SizeType.Absolute, 18F));
 
         _messageValue = new Label
         {
             Dock = DockStyle.Fill,
-            Font = new Font("Segoe UI", 9F, FontStyle.Regular),
+            Font = new Font("Segoe UI", 8F, FontStyle.Regular),
             ForeColor = Color.FromArgb(71, 85, 105),
             AutoEllipsis = true
         };
         _updatedValue = new Label
         {
             Dock = DockStyle.Fill,
-            Font = new Font("Segoe UI", 8.5F, FontStyle.Regular),
+            Font = new Font("Segoe UI", 7.5F, FontStyle.Regular),
             ForeColor = Color.FromArgb(100, 116, 139),
             AutoEllipsis = true
         };
@@ -153,12 +158,14 @@ public sealed class MachineCardView : Panel
         _stateBadge.Text = GetBadgeText(effectiveState);
         _stateBadge.BackColor = _accentColor;
 
-        _statusValue.Text = sample?.StatusText ?? "--";
+        _statusValue.Text = sample?.StatusDisplayText ?? "--";
         _modeValue.Text = sample?.ModeText ?? "--";
         _runValue.Text = sample?.RunStatusText ?? "--";
-        _oeeValue.Text = hasTargetMrr ? $"{runtimeState.OeeMetrics.OeePercent:0.0}%" : "--";
-        _mrrValue.Text = hasMrrGeometry ? $"{runtimeState.OeeMetrics.ActualMrrCm3PerMin:0.0}" : "--";
-        _partsValue.Text = sample?.PartCount.ToString() ?? "--";
+        _toolValue.Text = sample?.ToolText ?? "--";
+        _spindleValue.Text = sample?.SpindleSpeed.ToString() ?? "--";
+        _feedValue.Text = sample?.FeedText ?? "--";
+        _loadValue.Text = sample?.SpindleLoadText ?? "--";
+        _alarmValue.Text = sample?.AlarmBadgeText ?? "--";
 
         if (sample?.AlarmActive == true)
         {
@@ -172,14 +179,14 @@ public sealed class MachineCardView : Panel
         }
         else
         {
-            _messageValue.Text = hasTargetMrr
-                ? $"Target MRR {runtimeState.OeeMetrics.TargetMrrCm3PerMin:0.0} cm3/min"
-                : (hasMrrGeometry ? "Set target MRR to enable OEE" : runtimeState.StatusMessage);
+            _messageValue.Text = sample is not null
+                ? $"Parts {sample.PartsText} | Axes {sample.AxisCount} | {(hasTargetMrr ? $"OEE {runtimeState.OeeMetrics.OeePercent:0.0}%" : (hasMrrGeometry ? "Set target MRR" : runtimeState.StatusMessage))}"
+                : runtimeState.StatusMessage;
             _messageValue.ForeColor = Color.FromArgb(71, 85, 105);
         }
 
         _updatedValue.Text = runtimeState.LastUpdated.HasValue
-            ? $"Updated {runtimeState.LastUpdated.Value:dd-MMM HH:mm:ss}"
+            ? $"Updated {runtimeState.LastUpdated.Value:dd-MMM HH:mm:ss.fff}"
             : "Waiting for first sample";
 
         Invalidate();
@@ -206,7 +213,7 @@ public sealed class MachineCardView : Panel
         {
             Dock = DockStyle.Fill,
             BackColor = Color.FromArgb(248, 250, 252),
-            Margin = new Padding(0, 0, 10, 10)
+            Margin = new Padding(0, 0, 8, 8)
         };
         panel.Paint += (_, e) =>
         {
@@ -219,26 +226,27 @@ public sealed class MachineCardView : Panel
             Dock = DockStyle.Fill,
             RowCount = 2,
             BackColor = Color.Transparent,
-            Padding = new Padding(12, 8, 12, 8)
+            Padding = new Padding(8, 5, 8, 5)
         };
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 18F));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 14F));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
 
         layout.Controls.Add(new Label
         {
             Dock = DockStyle.Fill,
             Text = caption,
-            Font = new Font("Segoe UI", 8.5F, FontStyle.Regular),
+            Font = new Font("Segoe UI", 7.5F, FontStyle.Regular),
             ForeColor = Color.FromArgb(100, 116, 139)
         }, 0, 0);
 
         valueLabel = new Label
         {
             Dock = DockStyle.Fill,
-            Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold),
+            Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold),
             ForeColor = Color.FromArgb(15, 23, 42),
             TextAlign = ContentAlignment.MiddleLeft,
-            AutoEllipsis = true
+            AutoEllipsis = true,
+            Text = "--"
         };
         layout.Controls.Add(valueLabel, 0, 1);
         panel.Controls.Add(layout);

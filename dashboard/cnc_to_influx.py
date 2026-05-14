@@ -55,6 +55,41 @@ def _to_number(value):
     return None
 
 
+def sample_unix_ms(sample):
+    raw_ms = sample.get("ts_ms")
+    if isinstance(raw_ms, (int, float)):
+        unix_ms = int(raw_ms)
+        if unix_ms > 0:
+            return unix_ms
+
+    raw_ts = sample.get("ts")
+    if isinstance(raw_ts, (int, float)):
+        unix_ts = int(raw_ts)
+        if unix_ts > 0:
+            return unix_ts * 1000
+
+    return int(datetime.now(timezone.utc).timestamp() * 1000)
+
+
+def sample_axis_names(sample):
+    axis_count = int(sample.get("axis_count", 0) or 0)
+    raw_names = sample.get("axis_names")
+    names = []
+
+    for index in range(axis_count):
+        fallback = f"Axis{index + 1}"
+        if isinstance(raw_names, list) and index < len(raw_names):
+            raw_name = raw_names[index]
+            if raw_name is not None:
+                text = str(raw_name).strip()
+                if text:
+                    names.append(text)
+                    continue
+        names.append(fallback)
+
+    return names
+
+
 def load_tracker_state(path):
     if not path:
         return None
@@ -105,22 +140,26 @@ def _is_running(sample):
 
 def enrich_sample(sample, tracker, ideal_cycle_sec):
     s = dict(sample)
-    ts = int(s.get("ts", int(datetime.now(timezone.utc).timestamp())))
+    unix_ms = sample_unix_ms(s)
+    ts = unix_ms // 1000
     part_count = int(s.get("part_count", s.get("counter", 0)) or 0)
     mode = s.get("mode")
     run_status = s.get("run_status")
     running = _is_running(s)
     productive_running = running and (mode in MODE_AUTO)
 
-    if tracker["prev_ts"] is not None:
-        dt = ts - tracker["prev_ts"]
-        if dt < 0:
-            dt = 0
+    prev_ts_ms = tracker.get("prev_ts_ms")
+    if prev_ts_ms is None and tracker.get("prev_ts") is not None:
+        prev_ts_ms = int(tracker["prev_ts"]) * 1000
+
+    if prev_ts_ms is not None:
+        dt = max(0.0, (unix_ms - prev_ts_ms) / 1000.0)
         if productive_running:
             tracker["run_sec"] += dt
         else:
             tracker["down_sec"] += dt
 
+    tracker["prev_ts_ms"] = unix_ms
     tracker["prev_ts"] = ts
 
     if tracker["last_part_raw"] is None:
@@ -186,15 +225,17 @@ def enrich_sample(sample, tracker, ideal_cycle_sec):
     s["quality_pct"] = quality * 100.0
     s["counter_reset_events"] = int(tracker["counter_reset_events"])
     s["oee_pct"] = oee * 100.0
+    s["ts"] = ts
+    s["ts_ms"] = unix_ms
     return s
 
 
 def build_point(sample, machine):
-    ts = int(sample.get("ts", int(datetime.now(timezone.utc).timestamp())))
+    unix_ms = sample_unix_ms(sample)
     point = Point("m80_metrics").tag("machine", machine)
 
     for key, val in sample.items():
-        if key in {"ts", "axis_torque", "axis_feed_rate", "ret"}:
+        if key in {"ts", "axis_torque", "axis_feed_rate", "axis_names", "ret"}:
             continue
         if isinstance(val, bool):
             point = point.field(key, int(val))
@@ -215,7 +256,10 @@ def build_point(sample, machine):
             if num is not None:
                 point = point.field(f"axis_feed_rate_{i}", num)
 
-    point = point.time(datetime.fromtimestamp(ts, tz=timezone.utc))
+    for i, name in enumerate(sample_axis_names(sample), start=1):
+        point = point.field(f"axis_name_{i}", name)
+
+    point = point.time(datetime.fromtimestamp(unix_ms / 1000.0, tz=timezone.utc))
     return point
 
 
@@ -228,11 +272,11 @@ def _escape_field_str(v):
 
 
 def build_line_protocol(sample, machine):
-    ts = int(sample.get("ts", int(datetime.now(timezone.utc).timestamp())))
+    unix_ms = sample_unix_ms(sample)
     fields = {}
 
     for key, val in sample.items():
-        if key in {"ts", "axis_torque", "axis_feed_rate", "ret"}:
+        if key in {"ts", "axis_torque", "axis_feed_rate", "axis_names", "ret"}:
             continue
         if isinstance(val, bool):
             fields[key] = int(val)
@@ -253,6 +297,9 @@ def build_line_protocol(sample, machine):
             if num is not None:
                 fields[f"axis_feed_rate_{i}"] = num
 
+    for i, name in enumerate(sample_axis_names(sample), start=1):
+        fields[f"axis_name_{i}"] = name
+
     if not fields:
         return None
 
@@ -268,7 +315,7 @@ def build_line_protocol(sample, machine):
             parts.append(f'{k}="{_escape_field_str(v)}"')
 
     tag_machine = _escape_tag(machine)
-    line = f"m80_metrics,machine={tag_machine} " + ",".join(parts) + f" {ts * 1000000000}"
+    line = f"m80_metrics,machine={tag_machine} " + ",".join(parts) + f" {unix_ms * 1000000}"
     return line
 
 
@@ -364,6 +411,7 @@ def main():
 
     tracker = {
         "prev_ts": None,
+        "prev_ts_ms": None,
         "run_sec": 0.0,
         "down_sec": 0.0,
         "last_part_raw": None,
