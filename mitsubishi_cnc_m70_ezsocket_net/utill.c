@@ -1,4 +1,5 @@
 #include "utill.h"
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
