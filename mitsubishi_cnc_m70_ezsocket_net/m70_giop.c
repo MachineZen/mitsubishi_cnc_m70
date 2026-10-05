@@ -4,6 +4,7 @@
 #include <time.h>
 #include "m70_giop.h"
 #include "socket.h"
+#include "m70_log.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -932,7 +933,10 @@ int mel_receive_response(m70_conn_t* conn, giop_header* giop, int* remain_length
 			*remain_length -= socket_recv_data_one_loop(conn->socket, &rpp, sizeof(rpp));
 			ret_code = rpp.is_error;
 			if (ret_code != 0)
+			{
 				ret_code = receive_error_data_response(conn, remain_length);
+				M70_LOG_WARNING("CNC returned error response, error_code=%d", ret_code);
+			}
 			else
 				return ret_code;
 		}

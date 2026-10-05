@@ -658,11 +658,11 @@ m70_error_code_e m70_cnc_read_spindle_override(m70_conn_t* conn, short system_no
 		}
 		else
 		{ // R7008 S command override First spindle {(6 spindles) difference 50} Second axis R7058
-			short ret = 0;
+			short reg = 0;
 			data_type = T_SHORT;
-			if (0 == melGetData(conn, 55, 107008 + 50 * (system_no - 1), 0, 0, &data_type, &ret)) // R7008
+			if (0 == melGetData(conn, 55, 107008 + 50 * (system_no - 1), 0, 0, &data_type, &reg)) // R7008
 			{
-				temp = ret;
+				temp = reg;
 				ret = M70_ERROR_CODE_OK;
 			}
 		}
@@ -765,11 +765,11 @@ m70_error_code_e m70_cnc_read_feed_override(m70_conn_t* conn, short system_no, s
 		}
 		else
 		{ // R2500 第1切削进给倍率 第1系统 {(4个系统） 相差 200} 第二轴 R2700
-			short ret = 0;
+			short reg = 0;
 			data_type = T_SHORT;
-			if (0 == melGetData(conn, 55, 102500 + 200 * (system_no - 1), 0, 0, &data_type, &ret)) // R2500
+			if (0 == melGetData(conn, 55, 102500 + 200 * (system_no - 1), 0, 0, &data_type, &reg)) // R2500
 			{
-				temp_override = ret;
+				temp_override = reg;
 				ret = M70_ERROR_CODE_OK;
 			}
 		}
