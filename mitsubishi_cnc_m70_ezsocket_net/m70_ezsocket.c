@@ -422,9 +422,14 @@ m70_error_code_e m70_cnc_read_is_alarm(m70_conn_t* conn, short system_no, bool* 
 
 	*alarm = false;
 	alarm_string alarm_info;
+	memset(&alarm_info, 0, sizeof(alarm_info));
 	bool isOk = 0 == melGetCurrentAlarmMsg(conn, system_no, 1, M_ALM_ALL_ALARM, &alarm_info);
-	if (isOk && alarm_info.alarm_length > 0)
-		*alarm = true;
+	if (isOk)
+	{
+		if (alarm_info.alarm_length > 0)
+			*alarm = true;
+		ret = M70_ERROR_CODE_OK;
+	}
 
 	return ret;
 }
